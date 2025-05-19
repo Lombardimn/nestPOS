@@ -5,13 +5,16 @@ import { Between, FindManyOptions, In, Repository } from 'typeorm';
 import { Transaction, TransactionContent } from './entities/transaction.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { endOfDay, isValid, parseISO, startOfDay } from 'date-fns';
+import { CouponsService } from 'src/coupons/coupons.service';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     @InjectRepository(Transaction) private readonly transactionRepository: Repository<Transaction>,
     @InjectRepository(TransactionContent) private readonly transactionContentRepository: Repository<TransactionContent>,
-    @InjectRepository(Product) private readonly productRepository: Repository<Product>
+    @InjectRepository(Product) private readonly productRepository: Repository<Product>,
+
+    private readonly couponsService: CouponsService
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto) {
@@ -19,9 +22,23 @@ export class TransactionsService {
     /** Iniciar la transaccion */
     await this.productRepository.manager.transaction(async (transactionEntityManager) => {
       const transaction = new Transaction()
-      transaction.total = createTransactionDto.contents.reduce(
+
+      /** Calcular el total y asignarlo */
+      const total = createTransactionDto.contents.reduce(
         (total, item) => total + (item.price * item.quantity) , 0
       )
+      transaction.total = total
+
+      /** Calcular el descuento si existe un cupón */
+      if (createTransactionDto.coupon) {
+        const coupon = await this.couponsService.applyCoupon({ coupon_name: createTransactionDto.coupon })
+        const discount = (coupon.percentage / 100) * total
+
+        /** Asignar los nuevos valores */
+        transaction.discount = discount
+        transaction.coupon = coupon.name
+        transaction.total -= discount
+      }
 
       for (const contents of createTransactionDto.contents) {
         const product = await transactionEntityManager.findOneBy( Product,{ id: contents.productId })
