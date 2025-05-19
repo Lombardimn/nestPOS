@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Between, FindManyOptions, In, Repository } from 'typeorm';
 import { Transaction, TransactionContent } from './entities/transaction.entity';
 import { Product } from 'src/products/entities/product.entity';
+import { endOfDay, isValid, parseISO, startOfDay } from 'date-fns';
 
 @Injectable()
 export class TransactionsService {
@@ -59,19 +59,89 @@ export class TransactionsService {
     return 'Venta registrada correctamente.'
   }
 
-  findAll() {
-    return `This action returns all transactions`;
+  findAll(transactionDate?: string) {
+    const options: FindManyOptions<Transaction> = {
+      relations: {
+        contents: true
+      }
+    }
+
+    /** Verificar si existe una Query */
+    if (transactionDate) {
+      const date = parseISO(transactionDate)
+
+      /** Validar si la fecha ingresada es valida */
+      if (!isValid(date)) {
+        throw new BadRequestException('La fecha ingresada no es valida')
+      }
+
+      /** Definir el rango de fechas */
+      const start = startOfDay(date)
+      const end = endOfDay(date)
+
+      /** Incorporar el rango de fechas en la consulta */
+      options.where = {
+        transactionDate: Between(start, end)
+      }
+    }
+
+    return this.transactionRepository.find(options)
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} transaction`;
+  async findOne(id: number) {
+    const transaccion = await this.transactionRepository.findOne({
+      where: {
+        id
+      },
+      relations: {
+        contents: true
+      }
+    })
+
+    if (!transaccion) {
+      throw new NotFoundException(`La transaccion con el ID: ${id} no existe`)
+    }
+
+    return transaccion
   }
 
-  update(id: number, updateTransactionDto: UpdateTransactionDto) {
-    return `This action updates a #${id} transaction`;
-  }
+  async remove(id: number) {
+    /** Iniciar la transaccion */
+    await this.transactionRepository.manager.transaction(async (transactionEntityManager) => {
+      const transaccion = await transactionEntityManager.findOne(Transaction, {
+        where: {
+          id
+        },
+        relations: {
+          contents: true
+        }
+      })
 
-  remove(id: number) {
-    return `This action removes a #${id} transaction`;
+      if (!transaccion) {
+        throw new NotFoundException(`La transaccion con el ID: ${id} no existe`)
+      }
+
+      /** Eliminar los productos de la transaccion manteniendo la integridad de la DB */
+      for (const content of transaccion.contents) {
+        /** Revertir el stock */
+        const product = await transactionEntityManager.findOneBy(Product, { id: content.product.id })
+        
+        if (!product) {
+          throw new NotFoundException(`El producto con el ID: ${content.product.id} no existe`)
+        }
+
+        product.stock += content.quantity
+        
+        await transactionEntityManager.save(product)
+        await transactionEntityManager.remove(TransactionContent, content)
+        }
+
+        /** Eliminar la transaccion */
+        await transactionEntityManager.remove(Transaction, transaccion)
+    })
+
+    return {
+      message: `La venta: ${id} ha sido eliminada correctamente.`,
+    }
   }
 }
