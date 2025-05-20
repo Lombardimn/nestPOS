@@ -55,9 +55,6 @@ export class CouponsService {
     const currentDay = new Date()
     const expirationDate = endOfDay(coupon.expirationDate)
     
-    console.log(currentDay, 'currentDay')
-    console.log(expirationDate, 'expirationDate')
-    
     if(isAfter(currentDay, expirationDate)) {
       throw new UnprocessableEntityException('El cupon que haz aplicado ya expiro')
     }
