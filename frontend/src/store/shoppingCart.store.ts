@@ -1,20 +1,37 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ProductType, ShoppingCartType } from "@/schemas";
+import { CouponResponseSchema, CouponType, ProductType, ShoppingCartType } from "@/schemas";
 import { devtools } from "zustand/middleware"
 import { create } from "zustand";
 
 interface Store {
   total: number
+  subTotalAmount: number
+  discount: number
   contents: ShoppingCartType
+  coupon: CouponType
   addToCart: (product: ProductType) => void
   updateQuantity: (id: ProductType['id'], quantity: number) => void
-  removeFromCart: (id: ProductType['id']) => void,
+  removeFromCart: (id: ProductType['id']) => void
   calculateTotal: () => void
+  applyCoupon: (coupon: string) => Promise<void>
+  applyDiscount: () => void
+  clearCart: () => void
+}
+
+const initialState = {
+  total: 0,
+  subTotalAmount: 0,
+  discount: 0,
+  contents: [],
+  coupon: {
+    name: '',
+    percentage: 0,
+    message: ''
+  }
 }
 
 export const useShoppingCartStore = create<Store>()(devtools((set, get) => ({
-  total: 0,
-  contents: [],
+  ...initialState,
   addToCart: (product) => {
     const { id: productId, categoryId: _categoryId, ...data } = product
     let contents: ShoppingCartType = []
@@ -75,6 +92,10 @@ export const useShoppingCartStore = create<Store>()(devtools((set, get) => ({
       contents
     }))
 
+    if (!get().contents.length) {
+      get().clearCart()
+    }
+
     /** Calcular total */
     get().calculateTotal()
   },
@@ -83,6 +104,51 @@ export const useShoppingCartStore = create<Store>()(devtools((set, get) => ({
 
     set(() => ({
       total
+    }))
+
+    /** Aplicar descuento */
+    if (get().coupon.percentage) {
+      get().applyDiscount()
+    }
+  },
+  applyCoupon: async (coupon) => {
+    const req = await fetch(
+      '/coupons/api',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          coupon_name: coupon
+        })
+      }
+    )
+
+    const json = await req.json()
+    const res = CouponResponseSchema.parse(json)
+
+    /** Actualizar el estado del carrito con el cupon */
+    set(() => ({
+      coupon: res
+    }))
+
+    /** Aplicar descuento */
+    if (res.percentage) {
+      get().applyDiscount()
+    }
+  },
+  applyDiscount: () => {
+    const subTotalAmount = get().contents.reduce((total, item) => total + (item.price * item.quantity), 0)
+    const discount = (get().coupon.percentage / 100) * subTotalAmount
+    const total = subTotalAmount - discount
+
+    set(() => ({
+      discount,
+      total,
+      subTotalAmount
+    }))
+  },
+  clearCart: () => {
+    set(() => ({
+      ...initialState
     }))
   }
 })))

@@ -15,7 +15,7 @@ export default function ShoppingCartItem({ item }: { item: CartItemType }) {
         <Image
           src={`${process.env.NEXT_PUBLIC_API_URL}/img/${item.image}`}
           alt={`Imagen de ${item.name}`}
-          sizes="100vw"
+          sizes="100%"
           fill
           className="object-cover rounded-md"
         />
