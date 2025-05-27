@@ -1,6 +1,8 @@
 import { ProductType } from "@/schemas";
 import { formatCurrency } from "@/utils";
 import Image from "next/image";
+import { PlusCircleIcon } from "@phosphor-icons/react/dist/ssr";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 
 export default function ProductCard({ product }: { product: ProductType }) {
   return (
@@ -33,7 +35,13 @@ export default function ProductCard({ product }: { product: ProductType }) {
         </div>
 
         <div>
-          <button>Comprar</button>
+          <AddToCartButton 
+            product={product}
+            icons={<PlusCircleIcon size={24} weight="duotone" />}
+            className="mt-4" 
+          >
+            Añadir
+          </AddToCartButton>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import ShoppingCart from "@/components/cart/ShoppingCart";
 import MainNav from "@/components/layout/MainNav";
 
 export default function RootLayout({
@@ -12,10 +13,10 @@ export default function RootLayout({
         <div className="md:flex-1 md:h-screen md:overflow-y-scroll pt-10  pb-32 px-10">
           {children}
         </div>
-        <aside className="md:w-96 md:h-screen md:overflow-y-scroll pt-10 pb-32 px-5 ">
-
+        <aside className="md:w-96 md:h-screen md:overflow-y-scroll pt-10 pb-32 px-5 bg-gray-100">
+          <ShoppingCart />
         </aside>
       </main>
     </>
-  );
+  )
 }

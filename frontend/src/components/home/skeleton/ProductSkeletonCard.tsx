@@ -18,6 +18,9 @@ export default function ProductSkeletonCard() {
           <Skeleton className="h-6 w-24 rounded-full bg-gray-400/60" />
           <Skeleton className="h-6 w-16 bg-gray-400/60" />
         </div>
+        <div className="mt-4">
+           <Skeleton className="h-9 w-24 px-4 py-2 bg-gray-400/60" />
+        </div>
       </div>
     </div>
   )
