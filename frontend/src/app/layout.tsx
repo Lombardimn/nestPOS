@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 /** Importar la fuente */
 const outfit = Outfit({
@@ -24,6 +25,12 @@ export default function RootLayout({
         className={`${outfit.className} antialiased`}
       >
         {children}
+
+        <Toaster
+          position="top-right"
+          duration={3000}
+          richColors
+        />
       </body>
     </html>
   );

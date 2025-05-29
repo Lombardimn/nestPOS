@@ -21,27 +21,37 @@ export default function ProductCard({ product }: { product: ProductType }) {
         <h3 className="text-lg font-bold text-gray-800 line-clamp-2">{product.name}</h3>
         <div className="mt-2 flex items-center">
           <div className="flex items-center space-x-2">
-            {product.stock > 0 ? (
-              <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                Disponibles: {product.stock}
-              </span>
-            ) : (
-              <span className="text-sm text-red-600 bg-red-100 px-2 py-1 rounded-full">
-                Agotado
-              </span>
-            )}
+            {
+              product.stock > 0 
+                ? (
+                    <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                      Disponibles: {product.stock}
+                    </span>
+                  )
+                : (
+                    <span className="text-sm text-red-600 bg-red-100 px-2 py-1 rounded-full">
+                      Agotado
+                    </span>
+                  )
+            }
             <p className="text-xl font-bold text-gray-900">{formatCurrency(product.price)}</p>
           </div>
         </div>
 
         <div>
-          <AddToCartButton 
-            product={product}
-            icons={<PlusCircleIcon size={24} weight="duotone" />}
-            className="mt-4" 
-          >
-            Añadir
-          </AddToCartButton>
+          {
+            product.stock > 0 
+              ? (
+                  <AddToCartButton 
+                    product={product}
+                    icons={<PlusCircleIcon size={24} weight="duotone" />}
+                    className="mt-4" 
+                  >
+                    Añadir
+                  </AddToCartButton>
+                ) 
+              : (null)
+          }
         </div>
       </div>
     </div>

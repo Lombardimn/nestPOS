@@ -15,17 +15,7 @@ export const AddToCartButton =  ({
   ...buttonProps 
 }: AddToCartButtonProps) => {
   const addToCart = useShoppingCartStore((state) => state.addToCart)
-
-  // const handleAddToCart = async () => {
-  //   try {
-  //     //addToCart();
-  //     //onSuccess?.();
-  //     // Lógica adicional como mostrar toast, etc.
-  //   } catch (error) {
-  //     console.error('Error adding to cart:', error);
-  //   }
-  // };
-
+  
   return (
     <Button
       onClick={() => addToCart(product)}
@@ -33,7 +23,6 @@ export const AddToCartButton =  ({
       {...buttonProps}
     >
       {children}
-      {/* {children} {cart.items > 0 && `(${cart.items})`} */}
     </Button>
   );
 };

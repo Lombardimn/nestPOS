@@ -73,7 +73,9 @@ export class TransactionsService {
       }
     })
 
-    return 'Venta registrada correctamente.'
+    return {
+      message: 'Venta registrada correctamente.'
+    }
   }
 
   findAll(transactionDate?: string) {

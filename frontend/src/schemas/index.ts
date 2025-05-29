@@ -28,6 +28,18 @@ export const ShoppingCartContentsSchema = ProductSchema.pick({
   quantity: z.number()
 })
 
+const OrderContentSchema = z.object({
+  productId: z.number(),
+  quantity: z.number(),
+  price: z.number()
+})
+
+export const OrderSchema = z.object({
+  total: z.number(),
+  coupon: z.string(),
+  contents: z.array(OrderContentSchema).min(1, { message: 'El Carrito no puede ir vacio' })
+})
+
 /** Export response schemas */
 export const CategoriesResponseSchema = z.array(CategorySchema)
 export const ShoppingCartSchema = z.array(ShoppingCartContentsSchema)
@@ -43,3 +55,15 @@ export type CategoryType = z.infer<typeof CategorySchema>
 export type ShoppingCartType = z.infer<typeof ShoppingCartSchema>
 export type CartItemType = z.infer<typeof ShoppingCartContentsSchema>
 export type CouponType = z.infer<typeof CouponResponseSchema>
+export type OrderType = z.infer<typeof OrderSchema>
+
+/** Response API Schemas */
+export const SuccessResponseSchema = z.object({
+  message: z.string() 
+})
+
+export const ErrorResponseSchema = z.object({
+  message: z.array(z.string()),
+  error: z.string(),
+  statusCode: z.number()
+})

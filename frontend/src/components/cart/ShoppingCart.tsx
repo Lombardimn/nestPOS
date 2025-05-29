@@ -5,6 +5,7 @@ import ShoppingCartItem from "./ShoppingCartItem";
 import { ShoppingCartIcon } from "@phosphor-icons/react";
 import { Amount } from "./Amount";
 import { CouponForm } from "./CouponForm";
+import { SubmitOrderForm } from "./SubmitOrderForm";
 
 export default function ShoppingCartStore() {
   const contents = useShoppingCartStore((state) => state.contents)
@@ -56,6 +57,10 @@ export default function ShoppingCartStore() {
 
               <div className="divide-y divide-gray-200 border-t border-gray-300">
                 <CouponForm />
+              </div>
+
+              <div className="divide-y divide-gray-200 border-t border-gray-300">
+                <SubmitOrderForm />
               </div>
             </>
           )
