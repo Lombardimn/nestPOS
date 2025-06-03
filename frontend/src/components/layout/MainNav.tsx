@@ -5,7 +5,7 @@ import { getCategory } from "@/services/category.service";
 export default async function MainNav() {
   const categories = await getCategory()
   return (
-    <header className="px-10 py-5 bg-gray-700 flex flex-col md:flex-row justify-between ">
+    <header className="px-10 py-5 bg-gray-700 flex flex-col md:flex-row justify-between">
       <div className="flex justify-center">
         <Logo />
       </div>
@@ -22,6 +22,12 @@ export default async function MainNav() {
             </Link>
           ))
         }
+        <Link
+          href={"/backoffice/products"}
+          className="rounded-md bg-green-400 font-bold py-2 px-4 text-white hover:bg-green-600 transition-colors"
+        >
+          Backoffice
+        </Link>
       </nav>
     </header>
   )
